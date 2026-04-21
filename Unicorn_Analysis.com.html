@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unicorn Startup EDA — 1,074 Companies</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  /* ══════════════════════════════════════
+     DESIGN TOKENS — Navy × Teal System
+  ══════════════════════════════════════ */
+  :root {
+    /* Core palette */
+    --navy-950:  #050c18;
+    --navy-900:  #091525;
+    --navy-800:  #0e2038;
+    --navy-700:  #132c4f;
+    --navy-600:  #1a3a66;
+    --navy-500:  #1e4478;
+    --teal-500:  #0ea5a0;
+    --teal-400:  #14c4be;
+    --teal-300:  #34d8d2;
+    --teal-200:  #7ee8e4;
+    --slate-400: #94a3b8;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --amber-500: #f59e0b;
+    --amber-400: #fbbf24;
+    --amber-300: #fcd34d;
+    --white:     #ffffff;
+
+    /* Semantic aliases */
+    --bg:        var(--navy-950);
+    --surface:   var(--navy-900);
+    --card:      var(--navy-800);
+    --card-hover: var(--navy-700);
+    --border:    rgba(14,165,160,0.15);
+    --border-strong: rgba(14,165,160,0.3);
+    --accent:    var(--teal-400);
+    --accent-dim: rgba(14,165,160,0.12);
+    --accent2:   var(--amber-400);
+    --accent2-dim: rgba(245,158,11,0.12);
+    --accent3:   var(--teal-300);
+    --gold:      var(--amber-400);
+    --text:      var(--slate-200);
+    --muted:     var(--slate-400);
+    --green:     #22d3a0;
+
+    /* Typography */
+    --font-display: 'Outfit', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+    --font-body:    'Outfit', sans-serif;
+
+    /* Spacing & shape */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.35);
+    --shadow-glow: 0 0 40px rgba(14,165,160,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SUBTLE GRID TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(14,165,160,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,165,160,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14,165,160,0.1) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 80% 80%, rgba(19,44,79,0.8) 0%, transparent 60%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(14,165,160,0.09) 0%, transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%, -65%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+    bottom: 15%; right: 8%;
+    pointer-events: none;
+  }
+
+  /* Decorative corner accent */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 400px; height: 400px;
+    background: conic-gradient(from 180deg at 100% 0%, rgba(14,165,160,0.08), transparent 40%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(14,165,160,0.1);
+    border: 1px solid rgba(14,165,160,0.3);
+    color: var(--teal-300);
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 18px; border-radius: 100px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .badge::before { content: '◆'; color: var(--teal-400); font-size: 7px; }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    color: var(--white);
+    animation: fadeUp 0.9s ease 0.1s both;
+  }
+
+  h1 span.grad {
+    background: linear-gradient(135deg, var(--teal-300) 0%, var(--teal-500) 60%, rgba(14,165,160,0.7) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 17px; font-weight: 400;
+    margin-top: 1.5rem;
+    animation: fadeUp 1s ease 0.2s both;
+  }
+
+  .hero-stats {
+    display: flex; gap: 0; margin-top: 3.5rem;
+    animation: fadeUp 1.1s ease 0.3s both;
+    background: var(--card);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .hero-stat {
+    text-align: center;
+    padding: 1.5rem 2.5rem;
+    border-right: 1px solid var(--border);
+  }
+  .hero-stat:last-child { border-right: none; }
+
+  .hero-stat .num {
+    font-family: var(--font-display);
+    font-size: 2.2rem; font-weight: 800;
+    color: var(--teal-300);
+    line-height: 1;
+  }
+  .hero-stat .label {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-top: 5px; font-weight: 500;
+  }
+
+  .hero-authors {
+    margin-top: 2.5rem;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.06em;
+    animation: fadeUp 1.2s ease 0.4s both;
+    border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 100px;
+    background: rgba(14,165,160,0.04);
+  }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    animation: pulse 2.5s ease infinite;
+  }
+  .scroll-hint::after { content: '↓'; font-size: 16px; color: var(--teal-400); margin-top: 4px; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5,12,24,0.85);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 0.25rem;
+    height: 56px;
+    overflow-x: auto;
+    box-shadow: 0 1px 0 var(--border), 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  nav::-webkit-scrollbar { height: 0; }
+
+  nav a {
+    color: var(--muted); text-decoration: none;
+    font-size: 12.5px; font-weight: 500; letter-spacing: 0.03em;
+    white-space: nowrap;
+    padding: 5px 12px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+  }
+  nav a:hover { color: var(--teal-300); background: rgba(14,165,160,0.08); }
+  nav a.active { color: var(--teal-300); background: rgba(14,165,160,0.12); }
+
+  .nav-logo {
+    font-family: var(--font-display); font-weight: 700; font-size: 15px;
+    color: var(--teal-300);
+    margin-right: 1.5rem; white-space: nowrap;
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .section {
+    max-width: 1300px; margin: 0 auto;
+    padding: 6rem 2rem;
+    position: relative; z-index: 1;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--teal-400);
+    margin-bottom: 0.6rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block; width: 20px; height: 1px;
+    background: var(--teal-400); opacity: 0.6;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+    font-weight: 700; line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .section-desc { color: var(--muted); max-width: 600px; margin-bottom: 3rem; font-size: 15px; }
+
+  hr.divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── GRIDS ── */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+  @media (max-width: 900px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .hero-stats { flex-wrap: wrap; }
+    .hero-stat { border-right: none; border-bottom: 1px solid var(--border); flex: 1 1 45%; }
+  }
+  @media (max-width: 1100px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    box-shadow: var(--shadow-card);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+    transform: translateY(-2px);
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 0.95rem; font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .stat-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-card), var(--shadow-glow); }
+
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 2px;
+  }
+  .stat-card.purple::before { background: linear-gradient(90deg, var(--teal-400), transparent); }
+  .stat-card.pink::before   { background: linear-gradient(90deg, var(--teal-300), transparent); }
+  .stat-card.teal::before   { background: linear-gradient(90deg, var(--teal-400), transparent); }
+  .stat-card.gold::before   { background: linear-gradient(90deg, var(--amber-400), transparent); }
+  .stat-card.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+
+  /* subtle glow inside each card */
+  .stat-card.purple::after,
+  .stat-card.teal::after,
+  .stat-card.pink::after {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(14,165,160,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .stat-card.gold::after {
+    content: '';
+    position: absolute; top: 0; right: 0;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .stat-card .stat-icon {
+    font-size: 1.4rem; margin-bottom: 0.75rem; display: block;
+    filter: saturate(0.9);
+  }
+  .stat-card .stat-num {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 800; line-height: 1;
+    margin-bottom: 5px;
+  }
+  .stat-card.purple .stat-num { color: var(--teal-300); }
+  .stat-card.pink .stat-num   { color: var(--teal-400); }
+  .stat-card.teal .stat-num   { color: var(--teal-200); }
+  .stat-card.gold .stat-num   { color: var(--amber-300); }
+  .stat-card.green .stat-num  { color: var(--green); }
+
+  .stat-card .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .stat-card .stat-note  { font-size: 11px; color: var(--slate-400); margin-top: 4px; font-family: var(--font-mono); opacity: 0.8; }
+
+  /* ── CHART CONTAINERS ── */
+  .chart-wrap {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.25s;
+  }
+  .chart-wrap:hover { border-color: var(--border-strong); }
+  .chart-wrap canvas { max-height: 300px; }
+  .chart-wrap.tall canvas { max-height: 420px; }
+
+  /* ── TABLES ── */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    padding: 13px 16px; text-align: left;
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--teal-400); font-weight: 400;
+    background: rgba(14,165,160,0.04);
+  }
+  td {
+    padding: 12px 16px;
+    font-size: 13.5px; color: var(--text);
+    border-bottom: 1px solid rgba(14,165,160,0.07);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(14,165,160,0.04); }
+
+  .rank-num {
+    font-family: var(--font-mono);
+    color: var(--muted); font-size: 12px;
+  }
+
+  /* ── TAGS ── */
+  .tag {
+    display: inline-block;
+    background: rgba(14,165,160,0.1);
+    border: 1px solid rgba(14,165,160,0.2);
+    color: var(--teal-300);
+    font-size: 11px; font-family: var(--font-mono);
+    padding: 2px 9px; border-radius: 5px;
+    letter-spacing: 0.02em;
+  }
+
+  .tag.teal   { background: rgba(14,165,160,0.1); border-color: rgba(14,165,160,0.25); color: var(--teal-300); }
+  .tag.pink   { background: rgba(14,165,160,0.08); border-color: rgba(14,165,160,0.2); color: var(--teal-200); }
+  .tag.gold   { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: var(--amber-300); }
+  .tag.green  { background: rgba(34,211,160,0.1); border-color: rgba(34,211,160,0.2); color: var(--green); }
+  .tag.purple { background: rgba(14,165,160,0.12); border-color: rgba(14,165,160,0.25); color: var(--teal-200); }
+
+  /* ── BAR INDICATORS ── */
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { width: 180px; font-size: 13px; color: var(--text); flex-shrink: 0; font-weight: 500; }
+  .bar-track {
+    flex: 1; height: 6px;
+    background: rgba(14,165,160,0.1);
+    border-radius: 100px; overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 100px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .bar-val { width: 60px; text-align: right; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--navy-950);
+    border: 1px solid rgba(14,165,160,0.2);
+    border-left: 3px solid var(--teal-400);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .code-block .kw  { color: var(--teal-300); }
+  .code-block .fn  { color: var(--teal-200); }
+  .code-block .str { color: var(--amber-300); }
+  .code-block .cm  { color: #3d5a80; }
+  .code-block .num { color: var(--amber-400); }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before {
+    content: '';
+    position: absolute; left: 7px; top: 8px;
+    width: 1px; bottom: 8px;
+    background: linear-gradient(180deg, var(--teal-400), rgba(14,165,160,0.1));
+  }
+  .tl-item { position: relative; margin-bottom: 2rem; }
+  .tl-dot {
+    position: absolute; left: -1.9rem; top: 4px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--teal-400);
+    background: var(--bg);
+    box-shadow: 0 0 10px rgba(14,165,160,0.3);
+  }
+  .tl-dot.peak {
+    border-color: var(--amber-400);
+    background: rgba(245,158,11,0.15);
+    box-shadow: 0 0 12px rgba(245,158,11,0.3);
+  }
+  .tl-year  { font-family: var(--font-mono); font-size: 11px; color: var(--teal-400); margin-bottom: 4px; }
+  .tl-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--white); }
+  .tl-desc  { font-size: 13px; color: var(--muted); }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: rgba(14,165,160,0.07);
+    border-left: 2px solid var(--teal-400);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 1rem 1.25rem;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 1rem;
+  }
+  .insight strong { color: var(--teal-300); }
+
+  /* ── AMBER ALERT / WARNING INSIGHT ── */
+  .insight.warn {
+    background: rgba(245,158,11,0.07);
+    border-left-color: var(--amber-400);
+  }
+  .insight.warn strong { color: var(--amber-300); }
+
+  /* ── METRIC GRID ── */
+  .metric-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: var(--radius-md); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .metric-cell {
+    background: var(--card);
+    padding: 1.25rem 1.5rem;
+  }
+  .metric-cell .mc-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; font-family: var(--font-mono); }
+  .metric-cell .mc-val   { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; color: var(--white); }
+
+  /* ── DONUT LEGEND ── */
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .dl-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .dl-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dl-pct  { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    position: relative; z-index: 1;
+    background: linear-gradient(0deg, rgba(14,165,160,0.03) 0%, transparent 100%);
+  }
+  footer strong { color: var(--teal-300); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; } 50% { opacity: 0.9; }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── PILLS ── */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 4px 12px; border-radius: 6px;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+  }
+  .pill:hover { color: var(--teal-300); border-color: rgba(14,165,160,0.35); background: rgba(14,165,160,0.07); }
+
+  /* ── CLEANING STEPS ── */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 0.75rem; }
+  .step {
+    counter-increment: step;
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 0.9rem 1rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(14,165,160,0.25); }
+  .step::before {
+    content: counter(step);
+    min-width: 26px; height: 26px;
+    background: rgba(14,165,160,0.12);
+    color: var(--teal-300);
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 1px solid rgba(14,165,160,0.2);
+  }
+  .step-title { font-size: 13px; font-weight: 600; color: var(--white); }
+  .step-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .full-width { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="badge">EDA Project · ENTC A-3</div>
+  <h1>Unicorn<br><span class="grad">Startup Analysis</span></h1>
+  <p class="hero-sub">Exploratory Data Analysis of 1,074 unicorn companies worldwide — uncovering patterns in industry, geography, funding, and valuation.</p>
+
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">1,074</div><div class="label">Unicorn Companies</div></div>
+    <div class="hero-stat"><div class="num">10</div><div class="label">Variables</div></div>
+    <div class="hero-stat"><div class="num">$3.46B</div><div class="label">Avg Valuation</div></div>
+    <div class="hero-stat"><div class="num">50+</div><div class="label">Countries</div></div>
+  </div>
+
+  <div class="hero-authors">Harshit &nbsp;·&nbsp; Khush Chauhan &nbsp;·&nbsp; Krishiv Sharma &nbsp;·&nbsp; Kshitij Dalvi</div>
+
+  <div class="scroll-hint">scroll</div>
+</section>
+
+<!-- ══════════ NAV ══════════ -->
+<nav>
+  <div class="nav-logo">🦄 Unicorn EDA</div>
+  <a href="#overview">Overview</a>
+  <a href="#cleaning">Cleaning</a>
+  <a href="#industry">Industry</a>
+  <a href="#geography">Geography</a>
+  <a href="#valuation">Valuation</a>
+  <a href="#growth">Growth</a>
+  <a href="#investors">Investors</a>
+  <a href="#outliers">Outliers</a>
+  <a href="#fintech">Fintech</a>
+  <a href="#takeaways">Takeaways</a>
+</nav>
+
+<hr class="divider">
+
+<!-- ══════════ OVERVIEW ══════════ -->
+<section class="section reveal" id="overview">
+  <div class="section-label">01 — Dataset Overview</div>
+  <h2 class="section-title">What is a Unicorn?</h2>
+  <p class="section-desc">A unicorn startup is a privately held company valued at over $1 billion. This EDA explores the full dataset of 1,074 unicorns to find hidden patterns.</p>
+
+  <div class="grid-4" style="margin-bottom:2rem">
+    <div class="stat-card purple">
+      <span class="stat-icon">🏢</span>
+      <div class="stat-num">1,074</div>
+      <div class="stat-label">Total Companies</div>
+      <div class="stat-note">across 50+ countries</div>
+    </div>
+    <div class="stat-card teal">
+      <span class="stat-icon">📊</span>
+      <div class="stat-num">10,740</div>
+      <div class="stat-label">Total Data Points</div>
+      <div class="stat-note">10 columns × 1,074 rows</div>
+    </div>
+    <div class="stat-card pink">
+      <span class="stat-icon">📅</span>
+      <div class="stat-num">~2013</div>
+      <div class="stat-label">Avg Year Founded</div>
+      <div class="stat-note">median: 2014</div>
+    </div>
+    <div class="stat-card gold">
+      <span class="stat-icon">⚠️</span>
+      <div class="stat-num">17</div>
+      <div class="stat-label">Missing Values</div>
+      <div class="stat-note">city: 16, investors: 1</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Dataset Columns</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="tag">Company</div>
+        <div class="tag">Valuation</div>
+        <div class="tag teal">Date Joined</div>
+        <div class="tag teal">Industry</div>
+        <div class="tag pink">City</div>
+        <div class="tag pink">Country / Region</div>
+        <div class="tag gold">Continent</div>
+        <div class="tag gold">Year Founded</div>
+        <div class="tag green">Funding</div>
+        <div class="tag green">Select Investors</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Tools Used</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:1rem">Analysis was performed using the following Python ecosystem:</p>
+      <div class="pills">
+        <span class="pill">Python</span>
+        <span class="pill">Pandas</span>
+        <span class="pill">NumPy</span>
+        <span class="pill">Matplotlib</span>
+        <span class="pill">Seaborn</span>
+        <span class="pill">Plotly</span>
+        <span class="pill">SciPy</span>
+        <span class="pill">NetworkX</span>
+        <span class="pill">matplotlib-venn</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Year Founded stats -->
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-title">Year Founded — Descriptive Stats</div>
+    <div class="metric-grid">
+      <div class="metric-cell"><div class="mc-label">Min</div><div class="mc-val">1919</div></div>
+      <div class="metric-cell"><div class="mc-label">Q1</div><div class="mc-val">2011</div></div>
+      <div class="metric-cell"><div class="mc-label">Median</div><div class="mc-val">2014</div></div>
+      <div class="metric-cell"><div class="mc-label">Q3</div><div class="mc-val">2016</div></div>
+      <div class="metric-cell"><div class="mc-label">Max</div><div class="mc-val">2021</div></div>
+      <div class="metric-cell"><div class="mc-label">Std Dev</div><div class="mc-val">5.70</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ DATA CLEANING ══════════ -->
+<section class="section reveal" id="cleaning">
+  <div class="section-label">02 — Data Cleaning</div>
+  <h2 class="section-title">Feature Engineering</h2>
+  <p class="section-desc">Currency strings were parsed to numeric values and new derived columns were created for downstream analysis.</p>
+
+  <div class="grid-2">
+    <div>
+      <div class="card-title" style="font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:var(--white)">Cleaning Logic Applied</div>
+      <div class="steps">
+        <div class="step"><div><div class="step-title">Strip "$" symbol</div><div class="step-desc">Remove currency prefix and whitespace</div></div></div>
+        <div class="step"><div><div class="step-title">Suffix 'B'</div><div class="step-desc">× 1,000,000,000 → Billions</div></div></div>
+        <div class="step"><div><div class="step-title">Suffix 'M'</div><div class="step-desc">× 1,000,000 → Millions</div></div></div>
+        <div class="step"><div><div class="step-title">Suffix 'K'</div><div class="step-desc">× 1,000 → Thousands</div></div></div>
+        <div class="step"><div><div class="step-title">Invalid values</div><div class="step-desc">Non-numeric / missing → NaN</div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="card-title" style="font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:var(--white)">New Columns Created</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="card" style="padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">Valuation_Cleaned</span><span class="tag">numeric</span></div>
+          <div style="font-size:12px;color:var(--muted)">Numeric valuation in USD</div>
+        </div>
+        <div class="card" style="padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">Funding_Cleaned</span><span class="tag">numeric</span></div>
+          <div style="font-size:12px;color:var(--muted)">Numeric funding in USD</div>
+        </div>
+        <div class="card" style="padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">Year Joined</span><span class="tag teal">datetime</span></div>
+          <div style="font-size:12px;color:var(--muted)">Extracted from Date Joined (datetime parse)</div>
+        </div>
+        <div class="card" style="padding:1rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:600;font-size:13px">Years to Unicorn</span><span class="tag pink">derived</span></div>
+          <div style="font-size:12px;color:var(--muted)">Year Joined − Year Founded</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem">
+    <div class="code-block">
+<span class="cm"># Core cleaning function</span>
+<span class="kw">def</span> <span class="fn">clean_currency_to_int</span>(value):
+    <span class="kw">if</span> pd.isna(value):  <span class="cm"># handle NaN</span>
+        <span class="kw">return</span> np.nan
+    val_str = <span class="fn">str</span>(value).replace(<span class="str">'$'</span>, <span class="str">''</span>).strip()
+    <span class="kw">try</span>:
+        <span class="kw">if</span> val_str.endswith(<span class="str">'B'</span>):
+            <span class="kw">return</span> <span class="fn">int</span>(<span class="fn">float</span>(val_str[:-<span class="num">1</span>]) * <span class="num">1_000_000_000</span>)
+        <span class="kw">elif</span> val_str.endswith(<span class="str">'M'</span>):
+            <span class="kw">return</span> <span class="fn">int</span>(<span class="fn">float</span>(val_str[:-<span class="num">1</span>]) * <span class="num">1_000_000</span>)
+        <span class="kw">elif</span> val_str.endswith(<span class="str">'K'</span>):
+            <span class="kw">return</span> <span class="fn">int</span>(<span class="fn">float</span>(val_str[:-<span class="num">1</span>]) * <span class="num">1_000</span>)
+    <span class="kw">except</span> ValueError:
+        <span class="kw">return</span> np.nan
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ BASIC ANALYSIS ══════════ -->
+<section class="section reveal" id="valuation">
+  <div class="section-label">03 — Basic Analysis</div>
+  <h2 class="section-title">Key Metrics</h2>
+  <p class="section-desc">Top-line statistics and outlier detection using the Interquartile Range method.</p>
+
+  <div class="grid-4" style="margin-bottom:2rem">
+    <div class="stat-card gold">
+      <span class="stat-icon">👑</span>
+      <div class="stat-num">$180B</div>
+      <div class="stat-label">Max Valuation</div>
+      <div class="stat-note">Bytedance (China)</div>
+    </div>
+    <div class="stat-card pink">
+      <span class="stat-icon">💰</span>
+      <div class="stat-num">$14B</div>
+      <div class="stat-label">Max Funding</div>
+      <div class="stat-note">JUUL Labs (USA)</div>
+    </div>
+    <div class="stat-card purple">
+      <span class="stat-icon">📈</span>
+      <div class="stat-num">$3.46B</div>
+      <div class="stat-label">Mean Valuation</div>
+      <div class="stat-note">across 1,074 unicorns</div>
+    </div>
+    <div class="stat-card teal">
+      <span class="stat-icon">📉</span>
+      <div class="stat-num">$557M</div>
+      <div class="stat-label">Mean Funding</div>
+      <div class="stat-note">per company average</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="stat-card purple">
+      <span class="stat-icon">🔺</span>
+      <div class="stat-num">102</div>
+      <div class="stat-label">Valuation Outliers</div>
+      <div class="stat-note">High-value unicorns ($10B+)</div>
+    </div>
+    <div class="stat-card pink">
+      <span class="stat-icon">🔺</span>
+      <div class="stat-num">54</div>
+      <div class="stat-label">Funding Outliers</div>
+      <div class="stat-note">Unusually high funding raised</div>
+    </div>
+    <div class="stat-card gold">
+      <span class="stat-icon">🔺</span>
+      <div class="stat-num">58</div>
+      <div class="stat-label">Year Founded Outliers</div>
+      <div class="stat-note">Founded pre-2000 or post-2019</div>
+    </div>
+  </div>
+
+  <!-- Valuation Distribution Chart -->
+  <div class="chart-wrap" style="margin-top:2rem">
+    <div class="card-title">Valuation Distribution — Top Tiers</div>
+    <canvas id="valuationChart"></canvas>
+    <div class="insight">Distribution is heavily <strong>right-skewed</strong> — ~77% of all unicorns sit in the $1B–$2B range. Bytedance at $180B is an extreme mega-outlier.</div>
+  </div>
+
+  <!-- Valuation tiers -->
+  <div class="card" style="margin-top:1.5rem">
+    <div class="card-title">Valuation Tiers (IQR Binning)</div>
+    <div class="bar-row">
+      <div class="bar-label">Standard ($1B–$10B)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:90%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div>
+      <div class="bar-val">~90%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Super ($10B–$50B)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:8%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div>
+      <div class="bar-val">~8%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Mega ($50B+)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:2%;background:linear-gradient(90deg,var(--amber-400),var(--amber-500))"></div></div>
+      <div class="bar-val">~2%</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ INDUSTRY ══════════ -->
+<section class="section reveal" id="industry">
+  <div class="section-label">04 — Industry Distribution</div>
+  <h2 class="section-title">Top Industries</h2>
+  <p class="section-desc">16 unique industry categories. Fintech and Internet SW together account for ~40% of all unicorns.</p>
+
+  <div class="grid-2">
+    <div class="chart-wrap tall">
+      <div class="card-title">Top 10 Industries by Unicorn Count</div>
+      <canvas id="industryChart"></canvas>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-title">Industry Share Breakdown</div>
+        <div class="bar-row">
+          <div class="bar-label">Fintech</div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div>
+          <div class="bar-val">20.86%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Internet SW & Svc</div>
+          <div class="bar-track"><div class="bar-fill" style="width:91.5%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div>
+          <div class="bar-val">19.09%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">E-commerce</div>
+          <div class="bar-track"><div class="bar-fill" style="width:49.6%;background:linear-gradient(90deg,#1a6e8a,var(--teal-500))"></div></div>
+          <div class="bar-val">10.34%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">AI & ML</div>
+          <div class="bar-track"><div class="bar-fill" style="width:37.5%;background:linear-gradient(90deg,var(--amber-400),var(--amber-500))"></div></div>
+          <div class="bar-val">7.82%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Health</div>
+          <div class="bar-track"><div class="bar-fill" style="width:33%;background:linear-gradient(90deg,var(--green),#1a9070))"></div></div>
+          <div class="bar-val">6.89%</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Supply Chain</div>
+          <div class="bar-track"><div class="bar-fill" style="width:25.5%;background:linear-gradient(90deg,#3d7bbf,#2a5a9f)"></div></div>
+          <div class="bar-val">5.31%</div>
+        </div>
+      </div>
+      <div class="insight">💡 Fintech & Internet SW together account for <strong>~40%</strong> of all unicorns. The AI sector at ~7.8% is growing rapidly and expected to climb significantly.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ GEOGRAPHY ══════════ -->
+<section class="section reveal" id="geography">
+  <div class="section-label">05 — Geographic Distribution</div>
+  <h2 class="section-title">Global Spread</h2>
+  <p class="section-desc">Top 10 countries account for ~85% of all unicorn companies globally.</p>
+
+  <div class="grid-2" style="margin-bottom:2rem">
+    <div class="chart-wrap tall">
+      <div class="card-title">Top Countries by Unicorn Count</div>
+      <canvas id="countryChart"></canvas>
+    </div>
+    <div>
+      <div class="table-wrap" style="margin-bottom:1.5rem">
+        <table>
+          <thead><tr><th>#</th><th>Country</th><th>Share</th></tr></thead>
+          <tbody>
+            <tr><td class="rank-num">1</td><td>🇺🇸 United States</td><td><span class="tag purple">52.33%</span></td></tr>
+            <tr><td class="rank-num">2</td><td>🇨🇳 China</td><td><span class="tag teal">16.11%</span></td></tr>
+            <tr><td class="rank-num">3</td><td>🇮🇳 India</td><td><span class="tag pink">6.05%</span></td></tr>
+            <tr><td class="rank-num">4</td><td>🇬🇧 United Kingdom</td><td><span class="tag gold">4.00%</span></td></tr>
+            <tr><td class="rank-num">5</td><td>🇩🇪 Germany</td><td><span class="tag">2.42%</span></td></tr>
+            <tr><td class="rank-num">6</td><td>🇫🇷 France</td><td><span class="tag">2.33%</span></td></tr>
+            <tr><td class="rank-num">7</td><td>🇮🇱 Israel</td><td><span class="tag">1.86%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight">The United States dominates with over <strong>52%</strong> of all unicorns. San Francisco alone accounts for 152 companies — more than entire countries.</div>
+    </div>
+  </div>
+
+  <!-- Continent -->
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <div class="card-title">Continent Distribution</div>
+      <div style="display:flex;align-items:center;gap:2rem">
+        <canvas id="continentChart" style="max-height:220px;max-width:220px;flex-shrink:0"></canvas>
+        <div class="donut-legend">
+          <div class="dl-item"><div class="dl-dot" style="background:var(--teal-400)"></div>North America<span class="dl-pct">54.84%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--teal-300)"></div>Asia<span class="dl-pct">28.86%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#3d7bbf"></div>Europe<span class="dl-pct">13.31%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--amber-400)"></div>South America<span class="dl-pct">1.96%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:var(--green)"></div>Oceania<span class="dl-pct">0.74%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#7bb8f5"></div>Africa<span class="dl-pct">0.28%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top Cities</div>
+      <div class="bar-row">
+        <div class="bar-label">San Francisco, USA</div>
+        <div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div>
+        <div class="bar-val">152</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">New York, USA</div>
+        <div class="bar-track"><div class="bar-fill" style="width:68%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div>
+        <div class="bar-val">103</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Beijing, China</div>
+        <div class="bar-track"><div class="bar-fill" style="width:55%;background:linear-gradient(90deg,#1a6e8a,var(--teal-500))"></div></div>
+        <div class="bar-val">~84</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Shanghai, China</div>
+        <div class="bar-track"><div class="bar-fill" style="width:38%;background:linear-gradient(90deg,var(--amber-400),var(--amber-500))"></div></div>
+        <div class="bar-val">~58</div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">London, UK</div>
+        <div class="bar-track"><div class="bar-fill" style="width:30%;background:linear-gradient(90deg,var(--green),#1a9070)"></div></div>
+        <div class="bar-val">~45</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ GROWTH OVER TIME ══════════ -->
+<section class="section reveal" id="growth">
+  <div class="section-label">06 — Growth Over Time</div>
+  <h2 class="section-title">Unicorn Timeline</h2>
+  <p class="section-desc">From slow beginnings to a historic 2021 surge driven by post-COVID tech adoption and low interest rates.</p>
+
+  <div class="grid-2">
+    <div class="chart-wrap tall">
+      <div class="card-title">New Unicorns Per Year</div>
+      <canvas id="growthChart"></canvas>
+    </div>
+    <div>
+      <div class="card-title" style="font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:1.25rem;color:var(--white)">Key Milestones</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2007 – 2012</div>
+          <div class="tl-title">Slow Rise</div>
+          <div class="tl-desc">Early unicorns emerge — a handful per year. The term "unicorn" is coined.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2013 – 2018</div>
+          <div class="tl-title">Steady Growth Phase</div>
+          <div class="tl-desc">Annual new unicorns climb from ~30 to ~100. Fintech and SaaS dominate.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2019 – 2020</div>
+          <div class="tl-title">COVID Disruption</div>
+          <div class="tl-desc">Brief slowdown in 2020 followed by explosive digital adoption.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot peak"></div>
+          <div class="tl-year">2021 — PEAK</div>
+          <div class="tl-title">Historic High 🚀</div>
+          <div class="tl-desc"><strong>414 new unicorns</strong> — powered by record-low interest rates and post-pandemic tech surge.</div>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem" class="card">
+        <div class="metric-grid">
+          <div class="metric-cell"><div class="mc-label">Median Time to Unicorn</div><div class="mc-val" style="color:var(--teal-300)">~7 years</div></div>
+          <div class="metric-cell"><div class="mc-label">Fastest (same year)</div><div class="mc-val" style="color:var(--amber-300)">0 years</div></div>
+          <div class="metric-cell"><div class="mc-label">Notable Fast: Ola Electric</div><div class="mc-val" style="color:var(--teal-200)">2 years</div></div>
+          <div class="metric-cell"><div class="mc-label">2021 New Unicorns</div><div class="mc-val" style="color:var(--green)">414</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ BIVARIATE ══════════ -->
+<section class="section reveal" id="bivariate">
+  <div class="section-label">07 — Bivariate Analysis</div>
+  <h2 class="section-title">Industry vs Valuation</h2>
+  <p class="section-desc">Cross-tabulation of industries against valuation tiers reveals concentration patterns and mega-unicorn potential.</p>
+
+  <div class="grid-2">
+    <div class="chart-wrap">
+      <div class="card-title">Avg Valuation by Industry (top 6)</div>
+      <canvas id="bivariateChart"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">Valuation Tier × Continent</div>
+      <div class="table-wrap" style="border:none">
+        <table>
+          <thead><tr><th>Continent</th><th>Standard</th><th>Super</th><th>Mega</th></tr></thead>
+          <tbody>
+            <tr><td>North America</td><td><span class="tag">high</span></td><td><span class="tag purple">high</span></td><td><span class="tag gold">dominant</span></td></tr>
+            <tr><td>Asia</td><td><span class="tag teal">high</span></td><td><span class="tag teal">growing</span></td><td><span class="tag teal">strong</span></td></tr>
+            <tr><td>Europe</td><td><span class="tag">medium</span></td><td><span class="tag">medium</span></td><td><span class="tag pink">rare</span></td></tr>
+            <tr><td>South America</td><td><span class="tag">low</span></td><td><span class="tag">very low</span></td><td>—</td></tr>
+            <tr><td>Oceania</td><td><span class="tag">low</span></td><td><span class="tag">low</span></td><td><span class="tag teal">Canva</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight" style="margin-top:1rem">Fintech & Internet SW lead across <strong>all valuation tiers</strong>. AI shows high concentration at $1B but growing mega-unicorn presence.</div>
+    </div>
+  </div>
+
+  <!-- Speed to Unicorn -->
+  <div class="chart-wrap" style="margin-top:2rem">
+    <div class="card-title">Fastest to Unicorn Status — Speed Champions</div>
+    <div class="table-wrap" style="border:none">
+      <table>
+        <thead><tr><th>#</th><th>Company</th><th>Year Founded</th><th>Year Joined</th><th>Time (Years)</th></tr></thead>
+        <tbody>
+          <tr><td class="rank-num">1</td><td>Candy.com</td><td>2021</td><td>2021</td><td><span class="tag gold">0</span></td></tr>
+          <tr><td class="rank-num">2</td><td>Flink Food</td><td>2021</td><td>2021</td><td><span class="tag gold">0</span></td></tr>
+          <tr><td class="rank-num">3</td><td>ClickHouse</td><td>2021</td><td>2021</td><td><span class="tag gold">0</span></td></tr>
+          <tr><td class="rank-num">4</td><td>Mensa Brands</td><td>2021</td><td>2021</td><td><span class="tag gold">0</span></td></tr>
+          <tr><td class="rank-num">5</td><td>Ola Electric Mobility</td><td>2017</td><td>2019</td><td><span class="tag green">2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ TOP INVESTORS ══════════ -->
+<section class="section reveal" id="investors">
+  <div class="section-label">08 — Investor Analysis</div>
+  <h2 class="section-title">Top 15 Investors</h2>
+  <p class="section-desc">Most top investors are US-based. Many co-invest across rounds, creating concentrated influence in the ecosystem.</p>
+
+  <div class="grid-2">
+    <div class="chart-wrap tall">
+      <div class="card-title">Unicorns Backed (Top 15)</div>
+      <canvas id="investorChart"></canvas>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-title">Power Trio Combined Impact</div>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:0.5rem">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:13px">Sequoia Capital</span>
+              <span class="tag purple">~95+ unicorns</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:95%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:13px">Tiger Global Management</span>
+              <span class="tag teal">~85+ unicorns</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:85%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:13px">Accel</span>
+              <span class="tag pink">~72+ unicorns</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:72%;background:linear-gradient(90deg,#1a6e8a,var(--teal-500))"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="insight">Sequoia, Tiger Global & Accel collectively back <strong>250+ unicorns</strong>. The Venn diagram of their portfolios shows significant overlap — co-investment is the norm at the top.</div>
+      <div class="card" style="margin-top:1.5rem">
+        <div class="card-title">Venn: Shared Investments</div>
+        <div style="text-align:center;padding:1rem">
+          <svg viewBox="0 0 300 150" style="width:100%;max-width:280px">
+            <circle cx="110" cy="75" r="65" fill="rgba(14,165,160,0.12)" stroke="rgba(14,165,160,0.4)" stroke-width="1.5"/>
+            <circle cx="190" cy="75" r="65" fill="rgba(14,165,160,0.08)" stroke="rgba(14,165,160,0.3)" stroke-width="1.5"/>
+            <text x="78" y="75" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--teal-300)">Sequoia</text>
+            <text x="78" y="88" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--teal-300)">~67 unique</text>
+            <text x="222" y="75" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--teal-200)">Tiger</text>
+            <text x="222" y="88" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--teal-200)">~56 unique</text>
+            <text x="150" y="72" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="var(--white)">~28</text>
+            <text x="150" y="85" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="var(--muted)">shared</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ OUTLIERS ══════════ -->
+<section class="section reveal" id="outliers">
+  <div class="section-label">09 — Outlier Analysis</div>
+  <h2 class="section-title">IQR Outlier Detection</h2>
+  <p class="section-desc">Using Interquartile Range: Lower Bound = Q1 − 1.5×IQR · Upper Bound = Q3 + 1.5×IQR</p>
+
+  <div class="table-wrap" style="margin-bottom:2rem">
+    <table>
+      <thead><tr><th>Company</th><th>Metric</th><th>Value</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Bytedance</strong></td><td><span class="tag gold">Valuation</span></td><td style="font-family:var(--font-mono)">$180B</td><td>Highest valuation outlier by far</td></tr>
+        <tr><td><strong>SpaceX</strong></td><td><span class="tag gold">Valuation</span></td><td style="font-family:var(--font-mono)">$100B</td><td>Space industry leader</td></tr>
+        <tr><td><strong>SHEIN</strong></td><td><span class="tag gold">Valuation</span></td><td style="font-family:var(--font-mono)">$100B</td><td>E-commerce giant</td></tr>
+        <tr><td><strong>Stripe</strong></td><td><span class="tag gold">Valuation</span></td><td style="font-family:var(--font-mono)">$95B</td><td>Top Fintech unicorn</td></tr>
+        <tr><td><strong>JUUL Labs</strong></td><td><span class="tag pink">Funding</span></td><td style="font-family:var(--font-mono)">$14B</td><td>Highest funding outlier</td></tr>
+        <tr><td><strong>Epic Games</strong></td><td><span class="tag pink">Funding</span></td><td style="font-family:var(--font-mono)">$7B</td><td>Gaming giant</td></tr>
+        <tr><td><strong>Otto Bock HealthCare</strong></td><td><span class="tag teal">Year Founded</span></td><td style="font-family:var(--font-mono)">1919</td><td>Oldest company in dataset</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-3">
+    <div class="chart-wrap">
+      <div class="card-title">Boxplot: Valuation</div>
+      <canvas id="boxplot1"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="card-title">Boxplot: Funding</div>
+      <canvas id="boxplot2"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="card-title">Boxplot: Year Founded</div>
+      <canvas id="boxplot3"></canvas>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ FINTECH SPOTLIGHT ══════════ -->
+<section class="section reveal" id="fintech">
+  <div class="section-label">10 — Data Filtering</div>
+  <h2 class="section-title">Fintech Spotlight</h2>
+  <p class="section-desc">Fintech is the largest unicorn industry with 224 companies (20.86%). Top companies filtered by valuation.</p>
+
+  <div class="grid-2">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Company</th><th>Valuation</th><th>Country</th><th>Date Joined</th></tr></thead>
+        <tbody>
+          <tr><td class="rank-num">1</td><td><strong>Stripe</strong></td><td><span class="tag gold">$95B</span></td><td>🇺🇸 USA</td><td>Jan 2014</td></tr>
+          <tr><td class="rank-num">2</td><td><strong>Klarna</strong></td><td><span class="tag purple">$46B</span></td><td>🇸🇪 Sweden</td><td>Dec 2011</td></tr>
+          <tr><td class="rank-num">3</td><td><strong>Checkout.com</strong></td><td><span class="tag purple">$40B</span></td><td>🇬🇧 UK</td><td>May 2019</td></tr>
+          <tr><td class="rank-num">4</td><td><strong>Revolut</strong></td><td><span class="tag teal">$33B</span></td><td>🇬🇧 UK</td><td>Apr 2018</td></tr>
+          <tr><td class="rank-num">5</td><td><strong>FTX</strong></td><td><span class="tag teal">$32B</span></td><td>🇧🇸 Bahamas</td><td>Jul 2021</td></tr>
+          <tr><td class="rank-num">6</td><td><strong>Chime</strong></td><td><span class="tag pink">$25B</span></td><td>🇺🇸 USA</td><td>Mar 2019</td></tr>
+          <tr><td class="rank-num">7</td><td><strong>Rapyd</strong></td><td><span class="tag">$15B</span></td><td>🇬🇧 UK</td><td>Dec 2019</td></tr>
+          <tr><td class="rank-num">8</td><td><strong>Blockchain.com</strong></td><td><span class="tag">$14B</span></td><td>🇺🇸 USA</td><td>Feb 2021</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="chart-wrap">
+      <div class="card-title">Top Fintech by Valuation ($B)</div>
+      <canvas id="fintechChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ UNIVARIATE SUMMARY ══════════ -->
+<section class="section reveal">
+  <div class="section-label">11 — Univariate Analysis</div>
+  <h2 class="section-title">Summary Statistics</h2>
+  <p class="section-desc">Single-variable distributions across the full dataset.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📊 Valuation Distribution</div>
+      <div class="bar-row"><div class="bar-label">Exactly $1B</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div><div class="bar-val">43.85%</div></div>
+      <div class="bar-row"><div class="bar-label">$2B</div><div class="bar-track"><div class="bar-fill" style="width:52.7%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div><div class="bar-val">23.09%</div></div>
+      <div class="bar-row"><div class="bar-label">$3B</div><div class="bar-track"><div class="bar-fill" style="width:24.5%;background:linear-gradient(90deg,#1a6e8a,var(--teal-500))"></div></div><div class="bar-val">10.71%</div></div>
+      <div class="bar-row"><div class="bar-label">$4B+</div><div class="bar-track"><div class="bar-fill" style="width:21.9%;background:linear-gradient(90deg,var(--amber-400),var(--amber-500))"></div></div><div class="bar-val">~22%</div></div>
+      <div class="bar-row"><div class="bar-label">Above $20B</div><div class="bar-track"><div class="bar-fill" style="width:5.7%;background:linear-gradient(90deg,var(--green),#1a9070)"></div></div><div class="bar-val">~2.5%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏭 Industry Frequency</div>
+      <div class="bar-row"><div class="bar-label">Fintech</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:linear-gradient(90deg,var(--teal-400),var(--teal-500))"></div></div><div class="bar-val">224</div></div>
+      <div class="bar-row"><div class="bar-label">Internet SW</div><div class="bar-track"><div class="bar-fill" style="width:91.5%;background:linear-gradient(90deg,var(--teal-300),var(--teal-400))"></div></div><div class="bar-val">205</div></div>
+      <div class="bar-row"><div class="bar-label">E-commerce</div><div class="bar-track"><div class="bar-fill" style="width:49.6%;background:linear-gradient(90deg,#1a6e8a,var(--teal-500))"></div></div><div class="bar-val">111</div></div>
+      <div class="bar-row"><div class="bar-label">AI & ML</div><div class="bar-track"><div class="bar-fill" style="width:37.5%;background:linear-gradient(90deg,var(--amber-400),var(--amber-500))"></div></div><div class="bar-val">84</div></div>
+      <div class="bar-row"><div class="bar-label">Health</div><div class="bar-track"><div class="bar-fill" style="width:33%;background:linear-gradient(90deg,var(--green),#1a9070)"></div></div><div class="bar-val">74</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ══════════ KEY TAKEAWAYS ══════════ -->
+<section class="section reveal" id="takeaways">
+  <div class="section-label">12 — Conclusion</div>
+  <h2 class="section-title">Key Takeaways</h2>
+  <p class="section-desc">The unicorn landscape reflects a rapidly maturing global startup ecosystem — technology and financial services at its core, United States as its hub.</p>
+
+  <div class="grid-2">
+    <div class="card" style="border-color:rgba(14,165,160,0.25)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">💼</div>
+      <div class="card-title">Industry Dominance</div>
+      <p style="color:var(--muted);font-size:13px">Fintech & Internet Software dominate, accounting for ~40% of all unicorns globally combined. AI at 7.8% is the fastest growing sector.</p>
+    </div>
+    <div class="card" style="border-color:rgba(14,165,160,0.2)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">🌎</div>
+      <div class="card-title">USA Leads</div>
+      <p style="color:var(--muted);font-size:13px">The United States dominates with 52%+ of unicorns, far ahead of China (16%) and India (6%). San Francisco alone houses 152 companies.</p>
+    </div>
+    <div class="card" style="border-color:rgba(14,165,160,0.2)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">📊</div>
+      <div class="card-title">Right-Skewed Valuations</div>
+      <p style="color:var(--muted);font-size:13px">Valuations are heavily right-skewed — ~77% sit at $1B–$2B. Bytedance at $180B is an extreme outlier that inflates the mean significantly.</p>
+    </div>
+    <div class="card" style="border-color:rgba(245,158,11,0.2)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">🚀</div>
+      <div class="card-title">2021 Was Historic</div>
+      <p style="color:var(--muted);font-size:13px">414 new unicorns emerged in 2021, driven by post-COVID digital adoption, low interest rates, and a surge in tech investment globally.</p>
+    </div>
+    <div class="card" style="border-color:rgba(14,165,160,0.2)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">🏦</div>
+      <div class="card-title">Concentrated Investor Power</div>
+      <p style="color:var(--muted);font-size:13px">Sequoia, Tiger Global & Accel collectively back 250+ unicorn companies. US-based investors dominate with heavy cross-participation.</p>
+    </div>
+    <div class="card" style="border-color:rgba(14,165,160,0.2)">
+      <div style="font-size:2rem;margin-bottom:0.75rem">⚡</div>
+      <div class="card-title">Speed to Unicorn</div>
+      <p style="color:var(--muted);font-size:13px">Median time is ~7 years, but companies like Candy.com and Flink Food achieved unicorn status in the same year they were founded (2021).</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>Unicorn Startup EDA</strong> &nbsp;·&nbsp; Harshit · Khush Chauhan · Krishiv Sharma · Kshitij Dalvi &nbsp;·&nbsp; ENTC A-3<br>
+  <span style="font-size:12px;margin-top:8px;display:block;color:var(--muted)">Dataset: 1,074 Unicorn Companies · 10 Variables · Python + Pandas + Seaborn + Plotly</span>
+</footer>
+
+<script>
+// ── CHART DEFAULTS ──────────────────────────────────────
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#0e2038';
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(14,165,160,0.25)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.titleColor = '#e2e8f0';
+Chart.defaults.plugins.tooltip.bodyColor = '#94a3b8';
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+
+// Navy-Teal palette for charts
+const TEAL1  = 'rgba(20,196,190,0.85)';
+const TEAL2  = 'rgba(14,165,160,0.85)';
+const TEAL3  = 'rgba(52,216,210,0.80)';
+const AMBER  = 'rgba(251,191,36,0.85)';
+const GREEN  = 'rgba(34,211,160,0.80)';
+const BLUE   = 'rgba(61,123,191,0.80)';
+const TEAL_D = 'rgba(14,165,160,0.5)';
+
+const GRID = { color: 'rgba(14,165,160,0.08)', lineWidth: 1 };
+const BORDER_RADIUS = 6;
+
+// ── VALUATION DISTRIBUTION ──────────────────────────────
+new Chart(document.getElementById('valuationChart'), {
+  type: 'bar',
+  data: {
+    labels: ['$1B (43.85%)', '$2B (23.09%)', '$3B (10.71%)', '$4B (5.48%)', '$5B (3.91%)', '$6B–$9B (5.5%)', '$10B+ (9.5%)'],
+    datasets: [{
+      data: [43.85, 23.09, 10.71, 5.48, 3.91, 5.5, 9.5],
+      backgroundColor: [TEAL1,'rgba(14,165,160,0.75)','rgba(14,165,160,0.62)','rgba(14,165,160,0.5)','rgba(14,165,160,0.38)',BLUE,AMBER],
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: { grid: GRID },
+      y: { grid: GRID, ticks: { callback: v => v + '%' } }
+    }
+  }
+});
+
+// ── INDUSTRY ────────────────────────────────────────────
+new Chart(document.getElementById('industryChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Fintech','Internet SW','E-commerce','AI & ML','Health','Supply Chain','Fin Services','Data & Analytics','Auto & Transport','Cybersecurity'],
+    datasets: [{
+      data: [224, 205, 111, 84, 74, 57, 39, 35, 32, 28],
+      backgroundColor: [TEAL1,TEAL2,TEAL3,AMBER,GREEN,BLUE,'rgba(14,165,160,0.55)','rgba(14,165,160,0.45)','rgba(14,165,160,0.35)','rgba(245,158,11,0.55)'],
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { grid: GRID },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── COUNTRIES ───────────────────────────────────────────
+new Chart(document.getElementById('countryChart'), {
+  type: 'bar',
+  data: {
+    labels: ['USA','China','India','UK','Germany','France','Israel','South Korea','Brazil','Singapore'],
+    datasets: [{
+      data: [562, 173, 65, 43, 26, 25, 20, 18, 15, 12],
+      backgroundColor: [TEAL1,TEAL2,TEAL3,AMBER,GREEN,BLUE,'rgba(14,165,160,0.55)','rgba(14,165,160,0.45)','rgba(14,165,160,0.35)','rgba(245,158,11,0.5)'],
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { grid: GRID },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── CONTINENT DONUT ─────────────────────────────────────
+new Chart(document.getElementById('continentChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['North America','Asia','Europe','South America','Oceania','Africa'],
+    datasets: [{
+      data: [54.84, 28.86, 13.31, 1.96, 0.74, 0.28],
+      backgroundColor: [TEAL1,TEAL2,BLUE,AMBER,GREEN,'rgba(123,184,245,0.8)'],
+      borderColor: '#050c18',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '68%',
+    plugins: { legend: { display: false } }
+  }
+});
+
+// ── GROWTH OVER TIME ────────────────────────────────────
+new Chart(document.getElementById('growthChart'), {
+  type: 'line',
+  data: {
+    labels: ['2007','2008','2009','2010','2011','2012','2013','2014','2015','2016','2017','2018','2019','2020','2021'],
+    datasets: [{
+      data: [2, 3, 2, 5, 12, 18, 30, 52, 68, 78, 90, 105, 112, 89, 414],
+      borderColor: 'rgba(14,165,160,0.9)',
+      backgroundColor: 'rgba(14,165,160,0.07)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: 'rgba(20,196,190,1)',
+      pointBorderColor: '#050c18',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      x: { grid: GRID },
+      y: { grid: GRID }
+    }
+  }
+});
+
+// ── BIVARIATE: Avg Valuation by Industry ────────────────
+new Chart(document.getElementById('bivariateChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Space/Other','E-commerce','Fintech','AI & ML','Internet SW','Health'],
+    datasets: [{
+      label: 'Avg Valuation ($B)',
+      data: [8.4, 5.2, 4.8, 3.9, 3.4, 2.9],
+      backgroundColor: [AMBER,TEAL1,TEAL2,TEAL3,GREEN,BLUE],
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: GRID, ticks: { callback: v => '$' + v + 'B' } }
+    }
+  }
+});
+
+// ── INVESTORS ───────────────────────────────────────────
+new Chart(document.getElementById('investorChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Sequoia Capital','Tiger Global','Accel','Andreessen Horowitz','Insight Partners','SoftBank','Lightspeed','GV','Kleiner Perkins','Y Combinator','General Catalyst','IVP','Spark Capital','NEA','Bessemer'],
+    datasets: [{
+      data: [95, 85, 72, 65, 60, 55, 50, 45, 42, 40, 38, 35, 32, 30, 28],
+      backgroundColor: Array(15).fill(0).map((_,i) => `rgba(14,165,160,${0.9 - i*0.04})`),
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { grid: GRID },
+      y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── BOXPLOT APPROXIMATIONS ──────────────────────────────
+function makeBoxplot(canvasId, label, q1, median, q3, min, max, color) {
+  const ctx = document.getElementById(canvasId);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Min','Q1','Median','Q3','Max'],
+      datasets: [{
+        data: [min, q1, median, q3, max],
+        backgroundColor: [`${color}30`,`${color}55`,`${color}cc`,`${color}88`,`${color}40`],
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: false } },
+      scales: { x: { grid: GRID }, y: { grid: GRID } }
+    }
+  });
+}
+makeBoxplot('boxplot1','Valuation ($B)', 1, 1, 2, 1, 180, '#0ea5a0');
+makeBoxplot('boxplot2','Funding ($B)', 0, 0.2, 0.55, 0, 14, '#14c4be');
+makeBoxplot('boxplot3','Year Founded', 2011, 2012, 2014, 1919, 2021, '#0ea5a0');
+
+// ── FINTECH CHART ───────────────────────────────────────
+new Chart(document.getElementById('fintechChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Stripe','Klarna','Checkout.com','Revolut','FTX','Chime','Rapyd','Blockchain.com'],
+    datasets: [{
+      data: [95, 46, 40, 33, 32, 25, 15, 14],
+      backgroundColor: [AMBER,TEAL1,TEAL2,TEAL3,GREEN,'rgba(14,165,160,0.65)','rgba(14,165,160,0.5)','rgba(14,165,160,0.4)'],
+      borderRadius: BORDER_RADIUS,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    scales: {
+      x: { grid: GRID, ticks: { callback: v => '$' + v + 'B' } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// ── SCROLL REVEAL ───────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── ACTIVE NAV ──────────────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
